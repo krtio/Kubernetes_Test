@@ -1,0 +1,59 @@
+name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    outputs:
+      IMAGE_TAG: ${{ steps.set-var.outputs.IMAGE_TAG }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-2
+          role-to-assume: ${{ secrets.ARN_ECR_PUSH_ROLE }}
+          role-session-name: ecrPrivatePushRole
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set Environment Variables
+        id: set-var
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
+          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+
+      - name: Build Docker Image
+        id: build-image
+        run: |
+          docker build -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+      - name: Push Docker Image to ECR
+        id: push-image
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update tag in values.yaml
+        run: |
+          sed -i "s%tag: .*%tag: latest%" eduprorepository/values.yaml
+
+      - name: Commit and Push Changes to values.yaml
+        run: |
+          git config user.name "krtio"
+          git config user.email "minwoo0612k@naver.com"
+          git add eduprorepository/values.yaml
+          git commit -m "Force update tag in values.yaml to latest" --author "krtio <minwoo0612k@naver.com>" --allow-empty
+          git push origin main
