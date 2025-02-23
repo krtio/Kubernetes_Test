@@ -70,3 +70,8 @@ jobs:
           git add eduprorepository/values.yaml
           git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
+
+      - name: Create Git Tag for Versioning
+        run: |
+          git tag -f $IMAGE_TAG
+          git push origin $IMAGE_TAG --force
