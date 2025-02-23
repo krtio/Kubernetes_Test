@@ -33,8 +33,20 @@ jobs:
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
           echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
-          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          
+          # 최신 태그 가져오기
+          LATEST_TAG=$(git tag -l 'v*' | sort -V | tail -n 1)
 
+          # 태그가 없으면 v1, 있으면 숫자 증가
+          if [[ -z "$LATEST_TAG" ]]; then
+            NEW_TAG="v1"
+          else
+            NEW_TAG="v$(( ${LATEST_TAG#v} + 1 ))"
+          fi
+
+          echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$NEW_TAG"
+      
       - name: Build Docker Image
         id: build-image
         run: |
@@ -47,12 +59,17 @@ jobs:
 
       - name: Update tag in values.yaml
         run: |
-          sed -i "s%tag: .*%tag: latest%" eduprorepository/values.yaml
+          sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
 
       - name: Commit and Push Changes to values.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
           git add eduprorepository/values.yaml
-          git commit -m "Force update tag in values.yaml to latest" --author "krtio <minwoo0612k@naver.com>" --allow-empty
+          git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
+
+      - name: Create Git Tag for Versioning
+        run: |
+          git tag $IMAGE_TAG
+          git push origin $IMAGE_TAG
