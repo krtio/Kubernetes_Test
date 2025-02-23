@@ -9,7 +9,7 @@ spec:
   strategy:
     type: {{ .Values.strategy.type | default "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable | default 0 }}
+      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable | default 1 }}
       maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge | default 1 }}
   selector:
     matchLabels:
@@ -19,11 +19,15 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-        - name: {{ .Values.imagePullSecrets | default "default-secret" }}
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Release.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.service.port | default 8080 }}
