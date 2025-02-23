@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
-  tag: v2
+  tag: v3
   pullPolicy: Always
 
 imagePullSecrets:
