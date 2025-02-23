@@ -5,12 +5,12 @@ metadata:
   labels:
     app: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   strategy:
-    type: {{ .Values.strategy.type }}
+    type: {{ .Values.strategy.type | default "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable }}
-      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable | default 0 }}
+      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge | default 1 }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}
@@ -20,10 +20,10 @@ spec:
         app: {{ .Release.Name }}
     spec:
       imagePullSecrets:
-        - name: {{ .Values.imagePullSecrets | first }}
+        - name: {{ .Values.imagePullSecrets | default "default-secret" }}
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
-            - containerPort: 30000
+            - containerPort: {{ .Values.service.port | default 8080 }}
