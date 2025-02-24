@@ -16,7 +16,7 @@ frontend:
 
   service:
     type: NodePort
-    port: 8888
+    port: 80
 
   ingress:
     enabled: false
@@ -54,7 +54,7 @@ backend:
 
   service:
     type: NodePort
-    port: 8889
+    port: 8080
 
   ingress:
     enabled: false
