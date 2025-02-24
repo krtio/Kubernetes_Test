@@ -5,6 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OX 퀴즈</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .question {
+            font-size: 22px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        .button {
+            font-size: 18px;
+            padding: 12px 25px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .button:hover {
+            transform: scale(1.1);
+        }
+        .button.o {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .button.x {
+            background-color: #F44336;
+            color: white;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .close-btn, .submit-btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            color: white;
+        }
+        .close-btn {
+            background: #ff7043;
+        }
+        .submit-btn {
+            background: #3498db;
+        }
+        .submit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        .submit-btn:disabled {
+            background: #b0c4de;
+            cursor: not-allowed;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .input-group input {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .checkbox-label {
+            align-self: flex-start;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">

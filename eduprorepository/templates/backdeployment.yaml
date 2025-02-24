@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app: {{ .Release.Name }}-backend
+spec:
+  replicas: {{ .Values.backend.replicaCount | default 1 }}
+  strategy:
+    type: {{ .Values.backend.strategy.type | default "RollingUpdate" }}
+    rollingUpdate:
+      maxUnavailable: {{ .Values.backend.strategy.rollingUpdate.maxUnavailable | default 1 }}
+      maxSurge: {{ .Values.backend.strategy.rollingUpdate.maxSurge | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-backend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default "bv1" }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - containerPort: {{ .Values.backend.service.port | default 8080 }}
