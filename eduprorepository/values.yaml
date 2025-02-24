@@ -54,7 +54,7 @@ backend:
 
   service:
     type: NodePort
-    port: 8080
+    port: 80
 
   ingress:
     enabled: false
