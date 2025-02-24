@@ -1,7 +1,12 @@
-FROM nginx:latest
+FROM php:8.1.31-apache
 
-COPY index.html /usr/share/nginx/html/
+WORKDIR /var/www/html
+
+COPY index.php /var/www/html
+
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["apache2-foreground"]

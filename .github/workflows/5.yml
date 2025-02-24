@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  ci-frontend:
+  ci:
     runs-on: ubuntu-latest
     outputs:
       IMAGE_TAG: ${{ steps.set-var.outputs.IMAGE_TAG }}
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0  # 전체 Git 이력 가져오기 (태그 조회 가능)
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -30,115 +30,50 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set Frontend Version Tag
+      - name: Set Environment Variables
         id: set-var
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
-          echo "ECR_REPOSITORY=eduprorepository-frontend" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
           
-          # 최신 fv 태그 가져오기
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^fv[0-9]+$' | head -n 1)
+          # 최신 태그 가져오기
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
 
+          # 태그가 없으면 v1, 있으면 숫자 증가
           if [[ -z "$LATEST_TAG" ]]; then
-            NEW_TAG="fv1"
+            NEW_TAG="v1"
           else
-            TAG_NUMBER=$(echo $LATEST_TAG | sed 's/fv//')
-            NEW_TAG="fv$((TAG_NUMBER + 1))"
+            TAG_NUMBER=$(echo $LATEST_TAG | sed 's/v//')
+            NEW_TAG="v$((TAG_NUMBER + 1))"
           fi
 
           echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
           echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "New Frontend image tag: $NEW_TAG"
+          echo "New image tag: $NEW_TAG"
 
-      - name: Build Frontend Docker Image
+      - name: Build Docker Image
+        id: build-image
         run: |
-          docker build -f frontend/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
 
-      - name: Push Frontend Docker Image to ECR
+      - name: Push Docker Image to ECR
+        id: push-image
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Update frontend tag in values.yaml
+      - name: Update tag in values.yaml
         run: |
-          sed -i "s%tag: fv.*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
-          sed -i "s%tag: fv.*%tag: $IMAGE_TAG%" eduprorepository/values-prod.yaml
-          
+          sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
+
       - name: Commit and Push Changes to values.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
           git add eduprorepository/values.yaml
-          git commit -m "Update frontend image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
+          git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
 
-      - name: Create Git Tag for Frontend Versioning
-        run: |
-          git tag -f $IMAGE_TAG
-          git push origin $IMAGE_TAG --force
-
-  ci-backend:
-    runs-on: ubuntu-latest
-    outputs:
-      IMAGE_TAG: ${{ steps.set-var.outputs.IMAGE_TAG }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ap-northeast-2
-          role-to-assume: ${{ secrets.ARN_ECR_PUSH_ROLE }}
-          role-session-name: ecrPrivatePushRole
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Set Backend Version Tag
-        id: set-var
-        run: |
-          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
-          echo "ECR_REPOSITORY=eduprorepository-backend" >> $GITHUB_ENV
-          
-          # 최신 bv 태그 가져오기
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^bv[0-9]+$' | head -n 1)
-
-          if [[ -z "$LATEST_TAG" ]]; then
-            NEW_TAG="bv1"
-          else
-            TAG_NUMBER=$(echo $LATEST_TAG | sed 's/bv//')
-            NEW_TAG="bv$((TAG_NUMBER + 1))"
-          fi
-
-          echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
-          echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "New Backend image tag: $NEW_TAG"
-
-      - name: Build Backend Docker Image
-        run: |
-          docker build -f backend/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-
-      - name: Push Backend Docker Image to ECR
-        run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Update backend tag in values.yaml
-        run: |
-          sed -i "s%tag: bv.*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
-          sed -i "s%tag: bv.*%tag: $IMAGE_TAG%" eduprorepository/values-prod.yaml
-          
-      - name: Commit and Push Changes to values.yaml
-        run: |
-          git config user.name "krtio"
-          git config user.email "minwoo0612k@naver.com"
-          git add eduprorepository/values.yaml
-          git commit -m "Update backend image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
-          git push origin main
-
-      - name: Create Git Tag for Backend Versioning
+      - name: Create Git Tag for Versioning
         run: |
           git tag -f $IMAGE_TAG
           git push origin $IMAGE_TAG --force
