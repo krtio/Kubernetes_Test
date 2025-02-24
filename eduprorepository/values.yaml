@@ -40,7 +40,7 @@ backend:
   replicaCount: 2
   image:
     repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository-backend
-    tag: bv3
+    tag: bv4
     pullPolicy: Always
 
   imagePullSecrets:
