@@ -62,12 +62,14 @@ jobs:
       - name: Update tag in values.yaml
         run: |
           sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
-
+          sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/values-prod.yaml
+          
       - name: Commit and Push Changes to values.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
           git add eduprorepository/values.yaml
+          git add eduprorepository/values-prod.yaml
           git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
 
