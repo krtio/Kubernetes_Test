@@ -44,16 +44,19 @@ jobs:
             PREFIX="bv"
           fi
           
+          # 최신 태그 검색 (PREFIX 기준 필터링)
           LATEST_TAG=$(git tag --sort=-v:refname | grep -E "^${PREFIX}[0-9]+$" | head -n 1)
 
+          # 최신 태그가 없으면 1부터 시작
           if [[ -z "$LATEST_TAG" ]]; then
             NEW_TAG="${PREFIX}1"
           else
-            TAG_NUMBER=$(echo $LATEST_TAG | sed "s/${PREFIX}//")
+            TAG_NUMBER=$(echo "$LATEST_TAG" | sed "s/${PREFIX}//")
             NEW_TAG="${PREFIX}$((TAG_NUMBER + 1))"
           fi
 
           echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "New Image Tag for ${{ matrix.service }}: $NEW_TAG"
 
       - name: Build Docker Image
@@ -66,8 +69,13 @@ jobs:
 
       - name: Update image tag in values.yaml
         run: |
-          sed -i "s/tag: ${PREFIX}[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values.yaml
-          sed -i "s/tag: ${PREFIX}[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values-prod.yaml
+          if [ "${{ matrix.service }}" == "frontend" ]; then
+            sed -i "s/tag: fv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values.yaml
+            sed -i "s/tag: fv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values-prod.yaml
+          else
+            sed -i "s/tag: bv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values.yaml
+            sed -i "s/tag: bv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values-prod.yaml
+          fi
 
       - name: Commit and Push Changes to values.yaml
         run: |
@@ -87,5 +95,10 @@ jobs:
 
       - name: Create Git Tag for Versioning
         run: |
-          git tag -f $IMAGE_TAG
-          git push origin $IMAGE_TAG --force
+          if git rev-parse "$IMAGE_TAG" >/dev/null 2>&1; then
+            git tag -d "$IMAGE_TAG"
+            git push origin --delete "$IMAGE_TAG"
+          fi
+          
+          git tag "$IMAGE_TAG"
+          git push origin "$IMAGE_TAG"
