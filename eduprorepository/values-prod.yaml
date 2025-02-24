@@ -3,7 +3,7 @@ namespace: prod
 
 image:
   repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
-  tag: latest
+  tag: fv3bv1v6
   pullPolicy: Always
 
 imagePullSecrets:

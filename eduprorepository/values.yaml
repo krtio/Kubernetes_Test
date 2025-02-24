@@ -1,37 +1,75 @@
-replicaCount: 2 
+frontend:
+  replicaCount: 2
+  image:
+    repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository-frontend
+    tag: fv8
+    pullPolicy: Always
 
-image:
-  repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
-  tag: v1
-  pullPolicy: Always
+  imagePullSecrets:
+    - ecr-regcred
 
-imagePullSecrets:
-  - ecr-regcred 
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ""
 
-serviceAccount:
-  create: true
-  automount: true
-  annotations: {}
-  name: "" 
+  service:
+    type: NodePort
+    port: 80
 
-service:
-  type: NodePort
-  port: 80
+  ingress:
+    enabled: false
+    className: ""
 
-ingress:
-  enabled: false
-  className: "" 
+  resources: {}
 
-resources: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
 
-autoscaling:
-  enabled: false 
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
 
-strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxUnavailable: 1
-    maxSurge: 1
+backend:
+  replicaCount: 2
+  image:
+    repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository-backend
+    tag: bv7
+    pullPolicy: Always
+
+  imagePullSecrets:
+    - ecr-regcred
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ""
+
+  service:
+    type: NodePort
+    port: 80
+
+  ingress:
+    enabled: false
+    className: ""
+
+  resources: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
