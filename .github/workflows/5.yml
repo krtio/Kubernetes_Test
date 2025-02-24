@@ -44,10 +44,8 @@ jobs:
             PREFIX="bv"
           fi
           
-          # 최신 태그 검색 (PREFIX 기준 필터링)
           LATEST_TAG=$(git tag --sort=-v:refname | grep -E "^${PREFIX}[0-9]+$" | head -n 1)
 
-          # 최신 태그가 없으면 1부터 시작
           if [[ -z "$LATEST_TAG" ]]; then
             NEW_TAG="${PREFIX}1"
           else
@@ -70,11 +68,11 @@ jobs:
       - name: Update image tag in values.yaml
         run: |
           if [ "${{ matrix.service }}" == "frontend" ]; then
-            sed -i "s/tag: fv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values.yaml
-            sed -i "s/tag: fv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values-prod.yaml
+            sed -i "/frontend:/,/tag:/s/tag: fv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values.yaml
+            sed -i "/frontend:/,/tag:/s/tag: fv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values-prod.yaml
           else
-            sed -i "s/tag: bv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values.yaml
-            sed -i "s/tag: bv[0-9]\+/tag: $IMAGE_TAG/g" eduprorepository/values-prod.yaml
+            sed -i "/backend:/,/tag:/s/tag: bv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values.yaml
+            sed -i "/backend:/,/tag:/s/tag: bv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values-prod.yaml
           fi
 
       - name: Commit and Push Changes to values.yaml
