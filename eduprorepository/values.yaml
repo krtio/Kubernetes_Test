@@ -17,6 +17,7 @@ frontend:
   service:
     type: NodePort
     port: 80
+    nodePort: 30080
 
   ingress:
     enabled: false
@@ -55,6 +56,7 @@ backend:
   service:
     type: NodePort
     port: 80
+    nodePort: 30081
 
   ingress:
     enabled: false
