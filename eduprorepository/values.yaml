@@ -1,7 +1,7 @@
 frontend:
   replicaCount: 2
   image:
-    repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository-frontend
+    repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
     tag: fv10
     pullPolicy: Always
 
@@ -39,7 +39,7 @@ frontend:
 backend:
   replicaCount: 2
   image:
-    repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository-backend
+    repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
     tag: bv10
     pullPolicy: Always
 
