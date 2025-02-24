@@ -9,7 +9,7 @@ spec:
   ports:
     - protocol: TCP
       port: {{ .Values.frontend.service.port }}
-      targetPort: 8888
+      targetPort: {{ .Values.frontend.service.port }}
 
 ---
 apiVersion: v1
@@ -23,4 +23,4 @@ spec:
   ports:
     - protocol: TCP
       port: {{ .Values.backend.service.port }}
-      targetPort: 8889
+      targetPort: {{ .Values.backend.service.port }}
