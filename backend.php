@@ -2,10 +2,10 @@
 header("Content-Type: application/json");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $servername = "192.168.10.10:3306";
+    $servername = "10.106.224.19:3306";
     $username = "root";
-    $password = "rootpassword";
-    $dbname = "quiz";
+    $password = "P@ssw0rd";
+    $dbname = "aaa";
 
     $conn = new mysqli($servername, $username, $password, $dbname);
     if ($conn->connect_error) {
