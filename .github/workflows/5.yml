@@ -1,5 +1,5 @@
 name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
-
+ 
 on: 
   push:
     branches: [ main ]
