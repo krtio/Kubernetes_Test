@@ -1,59 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-frontend
+  name: {{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}-frontend
+    app: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.frontend.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   strategy:
-    type: {{ .Values.frontend.strategy.type }}
+    type: {{ .Values.strategy.type | default "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: {{ .Values.frontend.strategy.rollingUpdate.maxUnavailable }}
-      maxSurge: {{ .Values.frontend.strategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable | default 1 }}
+      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge | default 1 }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-frontend
+      app: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-frontend
+        app: {{ .Release.Name }}
     spec:
+      {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-        - name: ecr-regcred
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
       containers:
-        - name: frontend
-          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "Always" }}
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
-            - containerPort: {{ .Values.frontend.service.port }}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Release.Name }}-backend
-  labels:
-    app: {{ .Release.Name }}-backend
-spec:
-  replicas: {{ .Values.backend.replicaCount }}
-  strategy:
-    type: {{ .Values.backend.strategy.type }}
-    rollingUpdate:
-      maxUnavailable: {{ .Values.backend.strategy.rollingUpdate.maxUnavailable }}
-      maxSurge: {{ .Values.backend.strategy.rollingUpdate.maxSurge }}
-  selector:
-    matchLabels:
-      app: {{ .Release.Name }}-backend
-  template:
-    metadata:
-      labels:
-        app: {{ .Release.Name }}-backend
-    spec:
-      imagePullSecrets:
-        - name: ecr-regcred
-      containers:
-        - name: backend
-          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.backend.image.pullPolicy | default "Always" }}
-          ports:
-            - containerPort: {{ .Values.backend.service.port }}
+            - containerPort: {{ .Values.service.port | default 8080 }}

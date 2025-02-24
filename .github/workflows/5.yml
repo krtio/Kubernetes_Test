@@ -1,6 +1,6 @@
 name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
- 
-on: 
+
+on:
   push:
     branches: [ main ]
 
@@ -9,16 +9,15 @@ permissions:
   contents: write
 
 jobs:
-  build-and-push:
-    strategy:
-      matrix:
-        service: [frontend, backend]
+  ci:
     runs-on: ubuntu-latest
+    outputs:
+      IMAGE_TAG: ${{ steps.set-var.outputs.IMAGE_TAG }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0  # 전체 Git 이력 가져오기 (태그 조회 가능)
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -31,72 +30,50 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set Image Version Tag
+      - name: Set Environment Variables
         id: set-var
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
           
-          if [ "${{ matrix.service }}" == "frontend" ]; then
-            echo "ECR_REPOSITORY=eduprorepository-frontend" >> $GITHUB_ENV
-            PREFIX="fv"
-          else
-            echo "ECR_REPOSITORY=eduprorepository-backend" >> $GITHUB_ENV
-            PREFIX="bv"
-          fi
-          
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E "^${PREFIX}[0-9]+$" | head -n 1)
+          # 최신 태그 가져오기
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
 
+          # 태그가 없으면 v1, 있으면 숫자 증가
           if [[ -z "$LATEST_TAG" ]]; then
-            NEW_TAG="${PREFIX}1"
+            NEW_TAG="v1"
           else
-            TAG_NUMBER=$(echo "$LATEST_TAG" | sed "s/${PREFIX}//")
-            NEW_TAG="${PREFIX}$((TAG_NUMBER + 1))"
+            TAG_NUMBER=$(echo $LATEST_TAG | sed 's/v//')
+            NEW_TAG="v$((TAG_NUMBER + 1))"
           fi
 
           echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
           echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "New Image Tag for ${{ matrix.service }}: $NEW_TAG"
+          echo "New image tag: $NEW_TAG"
 
       - name: Build Docker Image
+        id: build-image
         run: |
-          docker build -f ${{ matrix.service }}/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
 
       - name: Push Docker Image to ECR
+        id: push-image
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Update image tag in values.yaml
+      - name: Update tag in values.yaml
         run: |
-          if [ "${{ matrix.service }}" == "frontend" ]; then
-            sed -i "/frontend:/,/tag:/s/tag: fv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values.yaml
-            sed -i "/frontend:/,/tag:/s/tag: fv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values-prod.yaml
-          else
-            sed -i "/backend:/,/tag:/s/tag: bv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values.yaml
-            sed -i "/backend:/,/tag:/s/tag: bv[0-9]\+/tag: $IMAGE_TAG/" eduprorepository/values-prod.yaml
-          fi
+          sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
 
       - name: Commit and Push Changes to values.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
-
-          git add eduprorepository/values.yaml eduprorepository/values-prod.yaml
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update ${{ matrix.service }} image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>"
-            
-            git pull --rebase origin main || (git rebase --abort && git pull --no-rebase origin main)
-            git push origin main
-          fi
+          git add eduprorepository/values.yaml
+          git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
+          git push origin main
 
       - name: Create Git Tag for Versioning
         run: |
-          if git rev-parse "$IMAGE_TAG" >/dev/null 2>&1; then
-            git tag -d "$IMAGE_TAG"
-            git push origin --delete "$IMAGE_TAG"
-          fi
-          
-          git tag "$IMAGE_TAG"
-          git push origin "$IMAGE_TAG"
+          git tag -f $IMAGE_TAG
+          git push origin $IMAGE_TAG --force

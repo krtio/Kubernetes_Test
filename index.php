@@ -1,10 +1,58 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $servername = "10.110.212.126:3306";
+    $username = "admin";
+    $password = "P@ssw0rd";
+    $dbname = "aaa";
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        die(json_encode(["status" => "error", "message" => "DB 연결 실패"]));
+    }
+
+    $name = $_POST['name'];
+    $phone = $_POST['phone'];
+    $answer = $_POST['answer'];
+    $consent = isset($_POST['consent']) ? 1 : 0;
+    $timestamp = date("Y-m-d H:i:s");
+
+    if (empty($name) || empty($phone) || empty($answer) || !$consent) {
+        echo json_encode(["status" => "error", "message" => "모든 필드를 입력하세요."]);
+        exit();
+    }
+
+    $sql = "SELECT * FROM aaa WHERE name=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        echo json_encode(["status" => "error", "message" => "이미 응모한 이름입니다."]);
+    } else {
+        $sql = "INSERT INTO aaa (name, phone, answer, consent, timestamp) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sssis", $name, $phone, $answer, $consent, $timestamp);
+
+        if ($stmt->execute()) {
+            echo json_encode(["status" => "success", "message" => "응모가 완료되었습니다."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "저장 중 오류 발생."]);
+        }
+    }
+
+    $stmt->close();
+    $conn->close();
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OX 퀴즈</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -176,9 +224,8 @@
                 return;
             }
 
-            fetch("http://192.168.10.10:8080/backend.php", {
+            fetch("", {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: new URLSearchParams({ name, phone, answer: selectedAnswer, consent })
             })
             .then(res => res.json())
