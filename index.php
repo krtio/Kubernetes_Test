@@ -63,7 +63,7 @@
                 return;
             }
 
-            fetch("http://192.168.10.10:3306/backend.php", {
+            fetch("http://192.168.10.10:8080/backend.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: new URLSearchParams({ name, phone, answer: selectedAnswer, consent })
