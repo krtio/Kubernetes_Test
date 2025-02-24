@@ -19,13 +19,14 @@ spec:
       labels:
         app: {{ .Release.Name }}-frontend
     spec:
+      imagePullSecrets:
+        - name: ecr-regcred
       containers:
         - name: frontend
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "Always" }}
           ports:
             - containerPort: {{ .Values.frontend.service.port }}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -48,6 +49,8 @@ spec:
       labels:
         app: {{ .Release.Name }}-backend
     spec:
+      imagePullSecrets:
+        - name: ecr-regcred
       containers:
         - name: backend
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default "latest" }}"
