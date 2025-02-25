@@ -2,7 +2,7 @@ name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 permissions:
   id-token: write
@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
           
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
             echo "ECR_REPOSITORY=eduproproduction" >> $GITHUB_ENV
             echo "VALUES_FILE=values-prod.yaml" >> $GITHUB_ENV
             LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^prod-v[0-9]+$' | head -n 1)
@@ -72,11 +72,11 @@ jobs:
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Update tag in values.yaml
+      - name: Update tag in values.yaml or values-prod.yaml
         run: |
           sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/$VALUES_FILE
 
-      - name: Commit and Push Changes to values.yaml
+      - name: Commit and Push Changes to values.yaml or values-prod.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
@@ -86,5 +86,5 @@ jobs:
 
       - name: Create Git Tag for Versioning
         run: |
-          git tag -f $IMAGE_TAG
+          git tag -a $IMAGE_TAG -m "Release $IMAGE_TAG"
           git push origin $IMAGE_TAG --force
