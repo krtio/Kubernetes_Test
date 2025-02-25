@@ -1,4 +1,5 @@
 replicaCount: 2 
+namespace: dev
 
 image:
   repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
