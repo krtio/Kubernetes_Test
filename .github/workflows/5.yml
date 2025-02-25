@@ -2,7 +2,9 @@ name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - dev
 
 permissions:
   id-token: write
@@ -13,11 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       IMAGE_TAG: ${{ steps.set-var.outputs.IMAGE_TAG }}
+      VALUES_FILE: ${{ steps.set-var.outputs.VALUES_FILE }}
+      ECR_REPOSITORY: ${{ steps.set-var.outputs.ECR_REPOSITORY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 전체 Git 이력 가져오기 (태그 조회 가능)
+          fetch-depth: 0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -34,21 +38,30 @@ jobs:
         id: set-var
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
-          echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
           
-          # 최신 태그 가져오기
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
-
-          # 태그가 없으면 v1, 있으면 숫자 증가
-          if [[ -z "$LATEST_TAG" ]]; then
-            NEW_TAG="v1"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "ECR_REPOSITORY=eduproproduction" >> $GITHUB_ENV
+            echo "VALUES_FILE=values-prod.yaml" >> $GITHUB_ENV
+            LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^prod-v[0-9]+$' | head -n 1)
+            PREFIX="prod-v"
           else
-            TAG_NUMBER=$(echo $LATEST_TAG | sed 's/v//')
-            NEW_TAG="v$((TAG_NUMBER + 1))"
+            echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
+            echo "VALUES_FILE=values.yaml" >> $GITHUB_ENV
+            LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^dev-v[0-9]+$' | head -n 1)
+            PREFIX="dev-v"
+          fi
+
+          if [[ -z "$LATEST_TAG" ]]; then
+            NEW_TAG="${PREFIX}1"
+          else
+            TAG_NUMBER=$(echo $LATEST_TAG | sed "s/$PREFIX//")
+            NEW_TAG="${PREFIX}$((TAG_NUMBER + 1))"
           fi
 
           echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
           echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "VALUES_FILE=$VALUES_FILE" >> $GITHUB_OUTPUT
+          echo "ECR_REPOSITORY=$ECR_REPOSITORY" >> $GITHUB_OUTPUT
           echo "New image tag: $NEW_TAG"
 
       - name: Build Docker Image
@@ -63,15 +76,15 @@ jobs:
 
       - name: Update tag in values.yaml
         run: |
-          sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
+          sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/$VALUES_FILE
 
       - name: Commit and Push Changes to values.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
-          git add eduprorepository/values.yaml
+          git add eduprorepository/$VALUES_FILE
           git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
-          git push origin main
+          git push origin ${{ github.ref_name }}
 
       - name: Create Git Tag for Versioning
         run: |
