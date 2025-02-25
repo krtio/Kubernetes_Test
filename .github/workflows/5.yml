@@ -2,7 +2,7 @@ name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
 
 permissions:
   id-token: write
@@ -71,7 +71,7 @@ jobs:
           git config user.email "minwoo0612k@naver.com"
           git add eduprorepository/values.yaml
           git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
-          git push origin main
+          git push origin dev
 
       - name: Create Git Tag for Versioning
         run: |
