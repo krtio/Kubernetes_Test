@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['user'] = $user;
-            header('Location: 192.168.10.10:32603/index.php');
+            header('Location: http://192.168.10.10:31115/index.php');
             exit;
         } else {
             echo "<div class='error'>로그인 실패: 이메일 또는 패스워드를 확인하세요.</div>";
