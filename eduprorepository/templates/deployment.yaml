@@ -38,7 +38,7 @@ spec:
       volumes:
         - name: shared-storage
           persistentVolumeClaim:
-            claimName: session-pv
+            claimName: shared-storage
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
