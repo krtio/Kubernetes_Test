@@ -8,11 +8,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql mysqli \
     && docker-php-ext-enable pdo_mysql mysqli
 
-COPY index.php /var/www/html/
 COPY login.php /var/www/html/
 COPY logout.php /var/www/html/
 COPY quiz.php /var/www/html/
-COPY style.css /var/www/html/
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
