@@ -31,3 +31,22 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.service.port | default 8080 }}
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /www/var/html 
+
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: shared-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-storage
+spec:
+  accessModes:
+    - ReadWriteMany 
+  resources:
+    requests:
+      storage: 1Gi
