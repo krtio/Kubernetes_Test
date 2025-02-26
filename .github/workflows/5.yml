@@ -1,4 +1,4 @@
-name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
+name: Build Images and Push to ECR (CI) & Deploy to ArgoCD (CD)
 
 on:
   push:
@@ -12,12 +12,12 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     outputs:
-      IMAGE_TAG: ${{ steps.set-var.outputs.IMAGE_TAG }}
+      IMAGE_TAGS: ${{ steps.set-var.outputs.IMAGE_TAGS }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 전체 Git 이력 가져오기 (태그 조회 가능)
+          fetch-depth: 0  
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -35,43 +35,66 @@ jobs:
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
           echo "ECR_REPOSITORY=eduproproduction" >> $GITHUB_ENV
-          
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
 
-          if [[ -z "$LATEST_TAG" ]]; then
-            NEW_TAG="v1"
-          else
-            TAG_NUMBER=$(echo $LATEST_TAG | sed 's/v//')
-            NEW_TAG="v$((TAG_NUMBER + 1))"
-          fi
+          SERVICES=("index" "login" "logout" "quiz")
+          TAGS=()
 
-          echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
-          echo "IMAGE_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "New image tag: $NEW_TAG"
+          for SERVICE in "${SERVICES[@]}"; do
+            LATEST_TAG=$(git tag --sort=-v:refname | grep -E "^${SERVICE}v[0-9]+$" | head -n 1)
 
-      - name: Build Docker Image
-        id: build-image
+            if [[ -z "$LATEST_TAG" ]]; then
+              NEW_TAG="${SERVICE}v1"
+            else
+              TAG_NUMBER=$(echo $LATEST_TAG | sed "s/${SERVICE}v//")
+              NEW_TAG="${SERVICE}v$((TAG_NUMBER + 1))"
+            fi
+
+            echo "${SERVICE^^}_IMAGE_TAG=$NEW_TAG" >> $GITHUB_ENV
+            TAGS+=("$NEW_TAG")
+          done
+
+          echo "IMAGE_TAGS=${TAGS[@]}" >> $GITHUB_OUTPUT
+          echo "New image tags: ${TAGS[@]}"
+
+      - name: Build and Push Docker Images
         run: |
-          docker build -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          SERVICES=("index" "login" "logout" "quiz")
 
-      - name: Push Docker Image to ECR
-        id: push-image
-        run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          for SERVICE in "${SERVICES[@]}"; do
+            IMAGE_TAG="${SERVICE^^}_IMAGE_TAG"
+            TAG_VALUE=${!IMAGE_TAG}
 
-      - name: Update tag in values.yaml
+            echo "Building and pushing $SERVICE with tag $TAG_VALUE..."
+
+            docker build -f $SERVICE/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_VALUE .
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_VALUE
+          done
+
+      - name: Update tags in values.yaml
         run: |
-          sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/values.yaml
+          for SERVICE in index login logout quiz; do
+            IMAGE_TAG="${SERVICE^^}_IMAGE_TAG"
+            TAG_VALUE=${!IMAGE_TAG}
+
+            echo "Updating $SERVICE tag to $TAG_VALUE in values.yaml..."
+            sed -i "s%${SERVICE}: .*%${SERVICE}: $TAG_VALUE%" eduproproduction/values.yaml
+          done
 
       - name: Commit and Push Changes to values.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
           git add eduproproduction/values.yaml
-          git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
+          git commit -m "Update image tags: ${{ steps.set-var.outputs.IMAGE_TAGS }}" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
 
-      - name: Create Git Tag for Versioning
+      - name: Create Git Tags for Versioning
         run: |
-          git tag -f $IMAGE_TAG
-          git push origin $IMAGE_TAG --force
+          for SERVICE in index login logout quiz; do
+            IMAGE_TAG="${SERVICE^^}_IMAGE_TAG"
+            TAG_VALUE=${!IMAGE_TAG}
+
+            echo "Creating Git tag $TAG_VALUE..."
+            git tag -f $TAG_VALUE
+            git push origin $TAG_VALUE --force
+          done
