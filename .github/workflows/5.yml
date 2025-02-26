@@ -84,7 +84,7 @@ jobs:
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
-          git add eduproproduction/values.yaml
+          git add eduprorepository/values.yaml
           git commit -m "Update image tags: ${{ steps.set-var.outputs.IMAGE_TAGS }}" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
 
