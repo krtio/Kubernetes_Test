@@ -1,6 +1,6 @@
 name: Build Image and Push to ECR (CI) & Deploy to ArgoCD (CD)
 
-on: 
+on:
   push:
     branches: [main, dev]
 
@@ -40,20 +40,19 @@ jobs:
           if [[ "${{ github.ref_name }}" == "main" ]]; then
             echo "ECR_REPOSITORY=eduproproduction" >> $GITHUB_ENV
             echo "VALUES_FILE=values-prod.yaml" >> $GITHUB_ENV
+            LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
+            PREFIX="v"
           else
             echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
             echo "VALUES_FILE=values.yaml" >> $GITHUB_ENV
+            LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
+            PREFIX="v"
           fi
 
-          # 최신 태그 가져오기 (v1, v2, v3 형식)
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
-
-          # 새 태그 생성
-          PREFIX="v"
           if [[ -z "$LATEST_TAG" ]]; then
             NEW_TAG="${PREFIX}1"
           else
-            TAG_NUMBER=$(echo "$LATEST_TAG" | grep -o '[0-9]\+$') # 숫자만 추출
+            TAG_NUMBER=$(echo $LATEST_TAG | sed "s/$PREFIX//")
             NEW_TAG="${PREFIX}$((TAG_NUMBER + 1))"
           fi
 
@@ -73,11 +72,11 @@ jobs:
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Update tag in values.yaml or values-prod.yaml
+      - name: Update tag in values.yaml
         run: |
           sed -i "s%tag: .*%tag: $IMAGE_TAG%" eduprorepository/$VALUES_FILE
 
-      - name: Commit and Push Changes to values.yaml or values-prod.yaml
+      - name: Commit and Push Changes to values.yaml
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
