@@ -34,12 +34,10 @@ jobs:
         id: set-var
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
-          echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY=eduproproduction" >> $GITHUB_ENV
           
-          # 최신 태그 가져오기
           LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+$' | head -n 1)
 
-          # 태그가 없으면 v1, 있으면 숫자 증가
           if [[ -z "$LATEST_TAG" ]]; then
             NEW_TAG="v1"
           else
@@ -69,7 +67,7 @@ jobs:
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
-          git add eduprorepository/values.yaml
+          git add eduproproduction/values.yaml
           git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
 
