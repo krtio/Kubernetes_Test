@@ -1,37 +1,31 @@
-replicaCount: 2 
+replicaCount: 5
+namespace: prod
 
 image:
   repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
-  tag: v4
+  tag: latest
   pullPolicy: Always
 
 imagePullSecrets:
-  - ecr-regcred 
+  - ecr-regcred
 
 serviceAccount:
   create: true
   automount: true
   annotations: {}
-  name: "" 
+  name: ""
 
 service:
-  type: NodePort
+  type: LoadBalancer
   port: 80
 
 ingress:
   enabled: false
-  className: "" 
 
 resources: {}
 
 autoscaling:
-  enabled: false 
+  enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-
-strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxUnavailable: 1
-    maxSurge: 1
