@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 전체 Git 이력 가져오기 (태그 조회 가능)
+          fetch-depth: 0  
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -67,7 +67,7 @@ jobs:
         run: |
           git config user.name "krtio"
           git config user.email "minwoo0612k@naver.com"
-          git add eduproproduction/values.yaml
+          git add eduprorepository/values.yaml
           git commit -m "Update image tag to $IMAGE_TAG" --author "krtio <minwoo0612k@naver.com>" --allow-empty
           git push origin main
 
