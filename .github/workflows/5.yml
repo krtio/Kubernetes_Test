@@ -77,7 +77,7 @@ jobs:
             TAG_VALUE=${!IMAGE_TAG}
 
             echo "Updating $SERVICE tag to $TAG_VALUE in values.yaml..."
-            sed -i "s%${SERVICE}: .*%${SERVICE}: $TAG_VALUE%" eduproproduction/values.yaml
+            sed -i "s%${SERVICE}: .*%${SERVICE}: $TAG_VALUE%" eduprorepository/values.yaml
           done
 
       - name: Commit and Push Changes to values.yaml
