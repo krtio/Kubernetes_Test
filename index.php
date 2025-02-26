@@ -58,7 +58,7 @@ if ($result->num_rows == 0) {
 </header>
 
 <nav class="nav-menu">
-    <a href="./index.php?category=all">전체</a>
+    <a href="./index.php?category=all">wjdcp</a>
     <a href="./index.php?category=개발프로그래밍">개발 · 프로그래밍</a>
     <a href="./index.php?category=게임개발">게임 개발</a>
     <a href="./index.php?category=데이터사이언스">데이터 사이언스</a>
