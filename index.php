@@ -44,7 +44,7 @@ if ($result->num_rows == 0) {
 
 <header>
     <div class="center-section">
-      <a href="http://192.168.10.10:32603">
+      <a href="http://192.168.10.11">
         <img src="logo.png" alt="EduPro Logo">
       </a>
     </div>
