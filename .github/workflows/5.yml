@@ -41,12 +41,12 @@ jobs:
             echo "ECR_REPOSITORY=eduproproduction" >> $GITHUB_ENV
             echo "VALUES_FILE=values-prod.yaml" >> $GITHUB_ENV
             LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^prod-v[0-9]+$' | head -n 1)
-            PREFIX="prod-v"
+            PREFIX="v"
           else
             echo "ECR_REPOSITORY=eduprorepository" >> $GITHUB_ENV
             echo "VALUES_FILE=values.yaml" >> $GITHUB_ENV
             LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^dev-v[0-9]+$' | head -n 1)
-            PREFIX="dev-v"
+            PREFIX="v"
           fi
 
           if [[ -z "$LATEST_TAG" ]]; then
