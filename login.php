@@ -1,7 +1,7 @@
 <?php
-session_start();
+session_start(); 
 
-$host = '10.110.212.126:3306';
+$host = '10.96.105.25:3306';
 $dbname = 'aaa';
 $username = 'admin';
 $password = 'P@ssw0rd';
