@@ -1,5 +1,5 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") { 
     $servername = "10.96.105.25:3306";
     $username = "admin";
     $password = "P@ssw0rd";
