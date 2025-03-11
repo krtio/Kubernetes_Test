@@ -1,33 +1,36 @@
+{{- range $i, $port := list 80 81 82 83 84 }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ $.Release.Name }}-app{{ $i }}
   labels:
-    app: {{ .Release.Name }}
+    app: {{ $.Release.Name }}-app{{ $i }}
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: {{ $.Values.replicaCount | default 1 }}
   strategy:
-    type: {{ .Values.strategy.type | default "RollingUpdate" }}
+    type: {{ $.Values.strategy.type | default "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable | default 1 }}
-      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge | default 1 }}
+      maxUnavailable: {{ $.Values.strategy.rollingUpdate.maxUnavailable | default 1 }}
+      maxSurge: {{ $.Values.strategy.rollingUpdate.maxSurge | default 1 }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: {{ $.Release.Name }}-app{{ $i }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: {{ $.Release.Name }}-app{{ $i }}
     spec:
-      {{- if .Values.imagePullSecrets }}
+      {{- if $.Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
+        {{- range $.Values.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
       {{- end }}
       containers:
-        - name: {{ .Release.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+        - name: {{ $.Release.Name }}-app{{ $i }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default "latest" }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
-            - containerPort: {{ .Values.service.port | default 8080 }}
+            - containerPort: {{ $port }}
+{{- end }}
