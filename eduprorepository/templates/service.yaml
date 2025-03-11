@@ -3,10 +3,22 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.service.type | default "ClusterIP" }}
   selector:
     app: {{ .Release.Name }}
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
+    - protocol: TCP
+      port: 81
+      targetPort: 81
+    - protocol: TCP
+      port: 82
+      targetPort: 82
+    - protocol: TCP
+      port: 83
+      targetPort: 83
+    - protocol: TCP
+      port: 84
+      targetPort: 84
