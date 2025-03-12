@@ -5,60 +5,41 @@ metadata:
   name: {{ .name }}
   namespace: {{ .namespace }}
 spec:
-  type: {{ .service.type | default "ClusterIP" }}
+  type: NodePort
   selector:
     app: {{ .name }}
   ports:
     - protocol: TCP
       port: {{ .service.port }}
       targetPort: {{ .service.port }}
+      nodePort: {{ .service.nodePort | default (add 30000 .service.port) }}
 ---
 {{- end }}
 
 ---
-{{- range .Values.deployments }}
-{{- if .ingress.enabled }}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+
+apiVersion: v1
+kind: Service
 metadata:
-  name: {{ .name }}-ingress
-  namespace: {{ .namespace }}
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: msa-loadbalancer
+  namespace: prod
 spec:
-  ingressClassName: {{ .ingress.ingressClassName | default "nginx" }}
-  rules:
-    - host: {{ .ingress.host }}
-      http:
-        paths:
-          - path: /index.php(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .name }}
-                port:
-                  number: {{ .service.port }}
-          - path: /login.php(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .name }}
-                port:
-                  number: {{ .service.port }}
-          - path: /logout.php(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .name }}
-                port:
-                  number: {{ .service.port }}
-          - path: /quiz.php(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .name }}
-                port:
-                  number: {{ .service.port }}
----
-{{- end }}
-{{- end }}
+  type: LoadBalancer
+  selector:
+    app: app1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 30080
+    - protocol: TCP
+      port: 81
+      targetPort: 30081
+    - protocol: TCP
+      port: 82
+      targetPort: 30082
+    - protocol: TCP
+      port: 83
+      targetPort: 30083
+    - protocol: TCP
+      port: 84
+      targetPort: 30084
