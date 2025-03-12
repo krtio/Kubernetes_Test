@@ -4,7 +4,7 @@ deployments:
     replicaCount: 2
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
-      tag: v20
+      tag: v21
       pullPolicy: Always
     service:
       type: NodePort
@@ -17,7 +17,7 @@ deployments:
     replicaCount: 2
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduprorepository
-      tag: v20
+      tag: v21
       pullPolicy: Always
     service:
       type: NodePort
