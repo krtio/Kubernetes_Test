@@ -1,12 +1,10 @@
 {{- range .Values.deployments }}
----
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .name }}
-  namespace: {{ .namespace }}
 spec:
-  type: ClusterIP
+  type: {{ .service.type | default "ClusterIP" }}
   selector:
     app: {{ .name }}
   ports:
@@ -15,35 +13,3 @@ spec:
       targetPort: {{ .service.port }}
 ---
 {{- end }}
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: msa-loadbalancer
-  namespace: prod
-spec:
-  type: LoadBalancer
-  selector:
-    app: app1
-  ports:
-    - name: "http-80"
-      protocol: TCP
-      port: 80
-      targetPort: 80
-    - name: "http-81"
-      protocol: TCP
-      port: 81
-      targetPort: 81
-    - name: "http-82"
-      protocol: TCP
-      port: 82
-      targetPort: 82
-    - name: "http-83"
-      protocol: TCP
-      port: 83
-      targetPort: 83
-    - name: "http-84"
-      protocol: TCP
-      port: 84
-      targetPort: 84
