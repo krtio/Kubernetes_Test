@@ -14,9 +14,8 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: NodePort
+      type: ClusterIP
       port: 80
-      nodePort: 30080
     resources: {}
     autoscaling:
       enabled: false
@@ -44,9 +43,8 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: NodePort
+      type: ClusterIP
       port: 81
-      nodePort: 30081
     resources: {}
     autoscaling:
       enabled: false
@@ -74,9 +72,8 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: NodePort
+      type: ClusterIP
       port: 82
-      nodePort: 30082
     resources: {}
     autoscaling:
       enabled: false
@@ -104,9 +101,8 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: NodePort
+      type: ClusterIP
       port: 83
-      nodePort: 30083
     resources: {}
     autoscaling:
       enabled: false
@@ -134,9 +130,8 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: NodePort
+      type: ClusterIP
       port: 84
-      nodePort: 30084
     resources: {}
     autoscaling:
       enabled: false
@@ -149,19 +144,23 @@ deployments:
         maxUnavailable: 1
         maxSurge: 1
 
-# 공용 LoadBalancer 추가 (모든 서비스 트래픽을 분배)
 loadBalancer:
   enabled: true
   name: msa-loadbalancer
   namespace: prod
   ports:
-    - port: 80
-      targetPort: 30080
-    - port: 81
-      targetPort: 30081
-    - port: 82
-      targetPort: 30082
-    - port: 83
-      targetPort: 30083
-    - port: 84
-      targetPort: 30084
+    - name: app1
+      port: 80
+      targetPort: 80
+    - name: app2
+      port: 81
+      targetPort: 81
+    - name: app3
+      port: 82
+      targetPort: 82
+    - name: app4
+      port: 83
+      targetPort: 83
+    - name: app5
+      port: 84
+      targetPort: 84
