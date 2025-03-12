@@ -4,7 +4,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v18
+      tag: v8
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -14,8 +14,10 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 80
+    ingress:
+      enabled: false
     resources: {}
     autoscaling:
       enabled: false
@@ -33,7 +35,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v18
+      tag: v8
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -43,8 +45,10 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 81
+    ingress:
+      enabled: false
     resources: {}
     autoscaling:
       enabled: false
@@ -62,7 +66,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v18
+      tag: v8
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -72,8 +76,10 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 82
+    ingress:
+      enabled: false
     resources: {}
     autoscaling:
       enabled: false
@@ -91,7 +97,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v18
+      tag: v8
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -101,8 +107,10 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 83
+    ingress:
+      enabled: false
     resources: {}
     autoscaling:
       enabled: false
@@ -120,7 +128,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v18
+      tag: v8
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -130,8 +138,10 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 84
+    ingress:
+      enabled: false
     resources: {}
     autoscaling:
       enabled: false
@@ -143,24 +153,3 @@ deployments:
       rollingUpdate:
         maxUnavailable: 1
         maxSurge: 1
-
-loadBalancer:
-  enabled: true
-  name: msa-loadbalancer
-  namespace: prod
-  ports:
-    - name: app1
-      port: 80
-      targetPort: 80
-    - name: app2
-      port: 81
-      targetPort: 81
-    - name: app3
-      port: 82
-      targetPort: 82
-    - name: app4
-      port: 83
-      targetPort: 83
-    - name: app5
-      port: 84
-      targetPort: 84
