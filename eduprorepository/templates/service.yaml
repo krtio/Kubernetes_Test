@@ -1,18 +1,18 @@
 {{- range .Values.deployments }}
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .name }}
   namespace: {{ .namespace }}
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: {{ .name }}
   ports:
     - protocol: TCP
       port: {{ .service.port }}
       targetPort: {{ .service.port }}
-      nodePort: {{ .service.nodePort | default (add 30000 .service.port) }}
 ---
 {{- end }}
 
@@ -30,21 +30,20 @@ spec:
     - name: "http-80"
       protocol: TCP
       port: 80
-      targetPort: 30080
+      targetPort: 80
     - name: "http-81"
       protocol: TCP
       port: 81
-      targetPort: 30081
+      targetPort: 81
     - name: "http-82"
       protocol: TCP
       port: 82
-      targetPort: 30082
+      targetPort: 82
     - name: "http-83"
       protocol: TCP
       port: 83
-      targetPort: 30083
+      targetPort: 83
     - name: "http-84"
       protocol: TCP
       port: 84
-      targetPort: 30084
-
+      targetPort: 84
