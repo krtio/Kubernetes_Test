@@ -14,10 +14,13 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: LoadBalancer
+      type: ClusterIP
       port: 80
     ingress:
-      enabled: false
+      enabled: true
+      ingressClassName: nginx
+      host: app1.example.com
+      path: /
     resources: {}
     autoscaling:
       enabled: false
@@ -45,10 +48,13 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: LoadBalancer
+      type: ClusterIP
       port: 81
     ingress:
-      enabled: false
+      enabled: true
+      ingressClassName: nginx
+      host: app2.example.com
+      path: /
     resources: {}
     autoscaling:
       enabled: false
@@ -76,10 +82,13 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: LoadBalancer
+      type: ClusterIP 
       port: 82
     ingress:
-      enabled: false
+      enabled: true
+      ingressClassName: nginx
+      host: app3.example.com
+      path: /
     resources: {}
     autoscaling:
       enabled: false
@@ -107,10 +116,13 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: LoadBalancer
+      type: ClusterIP
       port: 83
     ingress:
-      enabled: false
+      enabled: true
+      ingressClassName: nginx
+      host: app4.example.com
+      path: /
     resources: {}
     autoscaling:
       enabled: false
@@ -138,10 +150,13 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: LoadBalancer
+      type: ClusterIP
       port: 84
     ingress:
-      enabled: false
+      enabled: true
+      ingressClassName: nginx
+      host: app5.example.com
+      path: /
     resources: {}
     autoscaling:
       enabled: false
