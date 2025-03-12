@@ -14,13 +14,9 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: NodePort
       port: 80
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      host: app1.example.com
-      path: /index.php
+      nodePort: 30080
     resources: {}
     autoscaling:
       enabled: false
@@ -48,13 +44,9 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: NodePort
       port: 81
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      host: app2.example.com
-      path: /login.php
+      nodePort: 30081
     resources: {}
     autoscaling:
       enabled: false
@@ -82,13 +74,9 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP 
+      type: NodePort
       port: 82
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      host: app3.example.com
-      path: /logout.php
+      nodePort: 30082
     resources: {}
     autoscaling:
       enabled: false
@@ -116,13 +104,9 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: NodePort
       port: 83
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      host: app4.example.com
-      path: /quiz.php
+      nodePort: 30083
     resources: {}
     autoscaling:
       enabled: false
@@ -150,13 +134,9 @@ deployments:
       annotations: {}
       name: ""
     service:
-      type: ClusterIP
+      type: NodePort
       port: 84
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      host: app5.example.com
-      path: /index.php
+      nodePort: 30084
     resources: {}
     autoscaling:
       enabled: false
@@ -168,3 +148,20 @@ deployments:
       rollingUpdate:
         maxUnavailable: 1
         maxSurge: 1
+
+# 공용 LoadBalancer 추가 (모든 서비스 트래픽을 분배)
+loadBalancer:
+  enabled: true
+  name: msa-loadbalancer
+  namespace: prod
+  ports:
+    - port: 80
+      targetPort: 30080
+    - port: 81
+      targetPort: 30081
+    - port: 82
+      targetPort: 30082
+    - port: 83
+      targetPort: 30083
+    - port: 84
+      targetPort: 30084
