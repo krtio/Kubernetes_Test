@@ -4,7 +4,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v15
+      tag: v16
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -34,7 +34,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v15
+      tag: v16
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -64,7 +64,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v15
+      tag: v16
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -94,7 +94,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v15
+      tag: v16
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
@@ -124,7 +124,7 @@ deployments:
     namespace: prod
     image:
       repository: 545009833003.dkr.ecr.ap-northeast-2.amazonaws.com/eduproproduction
-      tag: v15
+      tag: v16
       pullPolicy: Always
     imagePullSecrets:
       - ecr-regcred
