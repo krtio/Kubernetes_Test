@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
 COPY login.php /var/www/html/
 COPY logout.php /var/www/html/
 COPY quiz.php /var/www/html/
-COPT index.php /var/www/html/
+COPY index.php /var/www/html/
+COPY style.css /var/www/html/
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
